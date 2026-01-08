@@ -14,6 +14,7 @@ Development: https://github.com/keitaroyam/servalcat
 Documentation: https://servalcat.readthedocs.io/en/latest
 
 Structure refinement and validation for crystallography and single particle analysis.
+
 Servalcat implements pipelines that use Refmac5:
   - `servalcat refine_spa`: cryo-EM SPA refinement pipeline
   - `servalcat refine_cx`: small molecule crystallography
