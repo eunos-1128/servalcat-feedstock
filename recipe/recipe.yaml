@@ -11,7 +11,7 @@ source:
     sha256: 240ebe686a05b753f40c73276ea02abf6376b924d3b693a76eb2675e23a06634
 
 build:
-  number: 0
+  number: 1
   script:
     - if: unix
       then: |
@@ -47,6 +47,10 @@ requirements:
       then: make
     - if: win
       then: jom
+    - if: build_platform != target_platform
+      then:
+        - python
+        - cross-python_${{ target_platform }}
   host:
     - eigen >=3.4.0
     - gemmi ==0.7.3
