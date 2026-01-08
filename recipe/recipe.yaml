@@ -47,6 +47,10 @@ requirements:
       then: make
     - if: win
       then: jom
+    - if: build_platform != target_platform
+      then:
+        - python
+        - cross-python_${{ target_platform }}
   host:
     - eigen >=3.4.0
     - gemmi ==0.7.3
