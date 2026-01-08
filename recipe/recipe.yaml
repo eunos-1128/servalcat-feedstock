@@ -11,7 +11,7 @@ source:
     sha256: 240ebe686a05b753f40c73276ea02abf6376b924d3b693a76eb2675e23a06634
 
 build:
-  number: 0
+  number: 1
   script:
     - if: unix
       then: |
