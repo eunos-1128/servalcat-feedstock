@@ -86,7 +86,7 @@ tests:
 about:
   homepage: "https://pypi.org/project/servalcat"
   summary: "Structure refinement and validation for crystallography and single particle analysis"
-  description: >
+  description: |
     Structure refinement and validation for crystallography and single particle analysis.
 
     Servalcat implements pipelines that use Refmac5:
