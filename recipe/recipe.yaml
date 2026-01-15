@@ -13,21 +13,25 @@ source:
 build:
   number: 1
   script:
+    - sed -i.bak 's@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@' CMakeLists.txt
+    - rm CMakeLists.txt.bak
+    
     - if: unix
       then: |
-        rm -rf eigen/  # Remove vendored eigen to use the conda package
+        mkdir -p ${PREFIX}/bin
+        rm -rf eigen/  # Remove bundled eigen to use the conda package
         ${PYTHON} -m pip install . \
           -vv \
           --no-deps \
           --no-build-isolation \
           --config-settings="cmake.args=-DSEARCH_INSTALLED_GEMMI=ON;-DINSTALL_GEMMI_IF_BUILT=OFF;-DPYTHON_INSTALL_DIR=${SP_DIR}"
-        mkdir -p ${PREFIX}/bin
         cp ${RECIPE_DIR}/post-link.sh ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
         chmod +x ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
 
     - if: win
       then: |
         set "CMAKE_GENERATOR=NMake Makefiles JOM"
+        mkdir %PREFIX%\Scripts
         rmdir /s /q eigen
         %PYTHON% -m pip install . ^
           -vv ^
@@ -35,7 +39,6 @@ build:
           --no-deps ^
           --no-build-isolation ^
           --config-settings="cmake.args=-DSEARCH_INSTALLED_GEMMI=ON;-DINSTALL_GEMMI_IF_BUILT=OFF;-DPYTHON_INSTALL_DIR=%SP_DIR%"
-        mkdir %PREFIX%\Scripts
         copy %RECIPE_DIR%\post-link.bat %PREFIX%\Scripts\.%PKG_NAME%-post-link.bat
 
 requirements:
@@ -47,7 +50,9 @@ requirements:
     - if: unix
       then: make
     - if: win
-      then: jom
+      then:
+        - m2-sed
+        - jom
     - if: build_platform != target_platform
       then:
         - python
