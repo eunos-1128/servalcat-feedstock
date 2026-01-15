@@ -22,23 +22,22 @@ build:
           -vv \
           --no-deps \
           --no-build-isolation \
-          --config-settings="cmake.args=-DCMAKE_C_COMPILER=${CC};-DCMAKE_CXX_COMPILER=${CXX};-DPYTHON_INSTALL_DIR=${SP_DIR}"
+          --config-settings="cmake.args=-DPYTHON_INSTALL_DIR=${SP_DIR}"
         cp ${RECIPE_DIR}/post-link.sh ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
         chmod +x ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
 
     - if: win
       then: |
         @echo on
-        REM sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
+        sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
         set "CMAKE_GENERATOR=NMake Makefiles JOM"
         mkdir %PREFIX%\Scripts
         rmdir /s /q eigen
         %PYTHON% -m pip install . ^
           -vv ^
-          --prefix=%PREFIX% ^
           --no-deps ^
           --no-build-isolation ^
-          --config-settings="cmake.args=-DCMAKE_C_COMPILER=%CC%;-DCMAKE_CXX_COMPILER=%CXX%;-DPYTHON_INSTALL_DIR=%SP_DIR%"
+          --config-settings="cmake.args=-DPYTHON_INSTALL_DIR=%SP_DIR%"
         copy %RECIPE_DIR%\post-link.bat %PREFIX%\Scripts\.%PKG_NAME%-post-link.bat
 
 requirements:
