@@ -12,7 +12,7 @@ source:
 
 build:
   number: 1
-  script:    
+  script:
     - if: unix
       then: |
         set -exo pipefail
@@ -22,14 +22,14 @@ build:
           -vv \
           --no-deps \
           --no-build-isolation \
-          --config-settings="cmake.args=-DSEARCH_INSTALLED_GEMMI=ON;-DINSTALL_GEMMI_IF_BUILT=OFF;-DPYTHON_INSTALL_DIR=${SP_DIR}"
+          --config-settings="cmake.args=-DCMAKE_C_COMPILER=${CC};-DCMAKE_CXX_COMPILER=${CXX};-DPYTHON_INSTALL_DIR=${SP_DIR}"
         cp ${RECIPE_DIR}/post-link.sh ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
         chmod +x ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
 
     - if: win
       then: |
         @echo on
-        sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
+        REM sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
         set "CMAKE_GENERATOR=NMake Makefiles JOM"
         mkdir %PREFIX%\Scripts
         rmdir /s /q eigen
@@ -38,7 +38,7 @@ build:
           --prefix=%PREFIX% ^
           --no-deps ^
           --no-build-isolation ^
-          --config-settings="cmake.args=-DSEARCH_INSTALLED_GEMMI=ON;-DINSTALL_GEMMI_IF_BUILT=OFF;-DPYTHON_INSTALL_DIR=%SP_DIR%"
+          --config-settings="cmake.args=-DCMAKE_C_COMPILER=%CC%;-DCMAKE_CXX_COMPILER=%CXX%;-DPYTHON_INSTALL_DIR=%SP_DIR%"
         copy %RECIPE_DIR%\post-link.bat %PREFIX%\Scripts\.%PKG_NAME%-post-link.bat
 
 requirements:
