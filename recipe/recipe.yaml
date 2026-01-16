@@ -12,33 +12,37 @@ source:
 
 build:
   number: 3
+  entry_points:
+    - servalcat = servalcat.__main__:main
+    - refmacat = servalcat.refmac.refmac_wrapper:command_line
+  
   script:
     - if: unix
       then: |
         set -exo pipefail
-        mkdir -p ${PREFIX}/bin
         rm -rf eigen/  # Remove bundled eigen to use the conda package
         ${PYTHON} -m pip install . \
           -vv \
           --no-deps \
           --no-build-isolation \
-          --config-settings="cmake.args=-DCMAKE_PREFIX_PATH=${PREFIX};-DPython_EXECUTABLE=${PYTHON}"
+          --config-settings="cmake.args=-DPython_EXECUTABLE=${PYTHON}"
         cp ${RECIPE_DIR}/post-link.sh ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
         chmod +x ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
 
     - if: win
       then: |
         @echo on
-        if errorlevel 1 exit 1
-        if not exist "%PREFIX%\Scripts" mkdir "%PREFIX%\Scripts"
-        if errorlevel 1 exit 1
         rmdir /s /q eigen
         if errorlevel 1 exit 1
         %PYTHON% -m pip install . ^
           -vv ^
           --no-deps ^
           --no-build-isolation ^
-          --config-settings="cmake.args=-DCMAKE_PREFIX_PATH=%PREFIX%;-DPython_EXECUTABLE=%PYTHON%"
+          --config-settings="cmake.args=-DPython_EXECUTABLE=%PYTHON%"
+        if errorlevel 1 exit 1
+        del "%PREFIX%\Scripts\servalcat.exe"
+        if errorlevel 1 exit 1
+        del "%PREFIX%\Scripts\refmacat.exe"
         if errorlevel 1 exit 1
         copy %RECIPE_DIR%\post-link.bat %PREFIX%\Scripts\.%PKG_NAME%-post-link.bat
         if errorlevel 1 exit 1
@@ -51,8 +55,6 @@ requirements:
     - cmake
     - if: unix
       then: make
-    - if: win
-      then: m2-sed
     - if: build_platform != target_platform
       then:
         - python
@@ -79,12 +81,15 @@ tests:
         then: |
           servalcat --version
           servalcat --help
+          refmacat --help
           python tests/test_for_ci.py
       - if: win
         then: |
           servalcat --version
           if errorlevel 1 exit 1
           servalcat --help
+          if errorlevel 1 exit 1
+          refmacat --help
           if errorlevel 1 exit 1
           python tests/test_for_ci.py
           if errorlevel 1 exit 1
