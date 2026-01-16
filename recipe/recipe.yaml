@@ -37,8 +37,6 @@ build:
         if errorlevel 1 exit 1
         %PYTHON% -m pip install . ^
           -vv ^
-          --no-deps ^
-          --no-build-isolation ^
           --config-settings="cmake.args=-DPYTHON_INSTALL_DIR=%SP_DIR%"
         if errorlevel 1 exit 1
         copy %RECIPE_DIR%\post-link.bat %PREFIX%\Scripts\.%PKG_NAME%-post-link.bat
@@ -66,7 +64,6 @@ requirements:
     - python ${{ python }}
     - scikit-build-core
   run:
-    - ${{ pin_compatible("gemmi", upper_bound='x.x.x') }}
     - numpy >=1.15
     - omegaconf ==2.3.0
     - packaging
