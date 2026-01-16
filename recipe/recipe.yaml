@@ -16,21 +16,19 @@ build:
     - if: unix
       then: |
         set -exo pipefail
-        sed -i.bak 's@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@' CMakeLists.txt
         mkdir -p ${PREFIX}/bin
         rm -rf eigen/  # Remove bundled eigen to use the conda package
         ${PYTHON} -m pip install . \
           -vv \
           --no-deps \
           --no-build-isolation \
-          --config-settings="cmake.args=-DPYTHON_INSTALL_DIR=${SP_DIR}"
+          --config-settings="cmake.args=-DCMAKE_PREFIX_PATH=${PREFIX};-DPython_EXECUTABLE=${PYTHON}"
         cp ${RECIPE_DIR}/post-link.sh ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
         chmod +x ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
 
     - if: win
       then: |
         @echo on
-        REM sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
         if errorlevel 1 exit 1
         if not exist "%PREFIX%\Scripts" mkdir "%PREFIX%\Scripts"
         if errorlevel 1 exit 1
@@ -40,7 +38,7 @@ build:
           -vv ^
           --no-deps ^
           --no-build-isolation ^
-          --config-settings="cmake.args=-DCMAKE_INSTALL_PREFIX=%PREFIX%;-DPython_EXECUTABLE=%PYTHON%;-DPYTHON_INSTALL_DIR=%SP_DIR%"
+          --config-settings="cmake.args=-DCMAKE_PREFIX_PATH=%PREFIX%;-DPython_EXECUTABLE=%PYTHON%"
         if errorlevel 1 exit 1
         copy %RECIPE_DIR%\post-link.bat %PREFIX%\Scripts\.%PKG_NAME%-post-link.bat
         if errorlevel 1 exit 1
