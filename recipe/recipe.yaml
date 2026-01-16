@@ -11,7 +11,7 @@ source:
   sha256: c489767ff7ffbb1a856b7341bdcdb6ccd246b92c2f296436933f2d291360b29a
 
 build:
-  number: 1
+  number: 2
   script:
     - if: unix
       then: |
@@ -29,7 +29,7 @@ build:
     - if: win
       then: |
         @echo on
-        REM sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
+        sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
         if errorlevel 1 exit 1
         if not exist "%PREFIX%\Scripts" mkdir "%PREFIX%\Scripts"
         if errorlevel 1 exit 1
@@ -85,15 +85,7 @@ tests:
       - if: win
         then: |
           servalcat --version
-          if %errorlevel% equ 1 (
-              echo Command exited with code 1, forcing exit code 0
-              exit /b 0
-          )
           servalcat --help
-          if %errorlevel% equ 1 (
-              echo Command exited with code 1, forcing exit code 0
-              exit /b 0
-          )
           python tests/test_for_ci.py
 
     files:
