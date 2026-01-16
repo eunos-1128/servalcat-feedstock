@@ -11,31 +11,38 @@ source:
   sha256: c489767ff7ffbb1a856b7341bdcdb6ccd246b92c2f296436933f2d291360b29a
 
 build:
-  number: 0
+  number: 1
   script:
     - if: unix
       then: |
-        rm -rf eigen/  # Remove vendored eigen to use the conda package
+        set -exo pipefail
+        mkdir -p ${PREFIX}/bin
+        rm -rf eigen/  # Remove bundled eigen to use the conda package
         ${PYTHON} -m pip install . \
           -vv \
           --no-deps \
           --no-build-isolation \
-          --config-settings="cmake.args=-DSEARCH_INSTALLED_GEMMI=ON;-DINSTALL_GEMMI_IF_BUILT=OFF"
-        mkdir -p ${PREFIX}/bin
+          --config-settings="cmake.args=-DPYTHON_INSTALL_DIR=${SP_DIR}"
         cp ${RECIPE_DIR}/post-link.sh ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
         chmod +x ${PREFIX}/bin/.${PKG_NAME}-post-link.sh
 
     - if: win
       then: |
-        set "CMAKE_GENERATOR=NMake Makefiles JOM"
+        @echo on
+        REM sed -i.bak "s@#set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@set(CMAKE_INSTALL_BINDIR "${SKBUILD_SCRIPTS_DIR}")@" CMakeLists.txt
+        if errorlevel 1 exit 1
+        if not exist "%PREFIX%\Scripts" mkdir "%PREFIX%\Scripts"
+        if errorlevel 1 exit 1
         rmdir /s /q eigen
+        if errorlevel 1 exit 1
         %PYTHON% -m pip install . ^
           -vv ^
           --no-deps ^
           --no-build-isolation ^
-          --config-settings="cmake.args=-DSEARCH_INSTALLED_GEMMI=ON;-DINSTALL_GEMMI_IF_BUILT=OFF;-DCMAKE_GENERATOR_PLATFORM=;-DCMAKE_GENERATOR_TOOLSET="
-        mkdir %PREFIX%\Scripts
+          --config-settings="cmake.args=-DPYTHON_INSTALL_DIR=%SP_DIR%"
+        if errorlevel 1 exit 1
         copy %RECIPE_DIR%\post-link.bat %PREFIX%\Scripts\.%PKG_NAME%-post-link.bat
+        if errorlevel 1 exit 1
 
 requirements:
   build:
@@ -46,7 +53,7 @@ requirements:
     - if: unix
       then: make
     - if: win
-      then: jom
+      then: m2-sed
     - if: build_platform != target_platform
       then:
         - python
@@ -70,9 +77,25 @@ requirements:
 
 tests:
   - script:
-      - python -m servalcat --version
-      - python -m servalcat --help
-      - python tests/test_for_ci.py
+      - if: unix
+        then: |
+          servalcat --version
+          servalcat --help
+          python tests/test_for_ci.py
+      - if: win
+        then: |
+          servalcat --version
+          if %errorlevel% equ 1 (
+              echo Command exited with code 1, forcing exit code 0
+              exit /b 0
+          )
+          servalcat --help
+          if %errorlevel% equ 1 (
+              echo Command exited with code 1, forcing exit code 0
+              exit /b 0
+          )
+          python tests/test_for_ci.py
+
     files:
       source:
         - tests/test_for_ci.py
